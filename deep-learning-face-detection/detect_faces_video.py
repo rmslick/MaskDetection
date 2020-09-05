@@ -59,9 +59,12 @@ while True:
 			(0, 0, 255), 2)
 		cv2.putText(frame, text, (startX, y),
 			cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
+		#cropping the rest of the body out of the frame to only show the face.
+		crop_image = frame[startY:endY,startX:endX]
+	cv2.imshow("face",crop_image)
 
 	# show the output frame
-	cv2.imshow("Frame", frame)
+	#cv2.imshow("Frame", frame)
 	key = cv2.waitKey(1) & 0xFF
  
 	# if the `q` key was pressed, break from the loop
