@@ -13,26 +13,41 @@ from PIL import Image, ImageOps
 from gtts import gTTS
 from playsound import playsound
 import os
+from time import sleep
+import serial
+# Added by Robert to handle multiple filesystems
+'''
+ser = serial.Serial('/dev/cu.usbmodem14201', 9600)
+def send_angle():
+	global ser
+    ser.write(str.encode(str(chr(48))))
+    print(ser.readline())
+    sleep(10)
+    ser.write(str.encode(str(chr(49)))) 
+    print(ser.readline())  
+	'''
+mytext = 'You are not wearing a mask. Please take one from the opening box.'
+language = 'en'
+myobj = gTTS(text=mytext, lang=language, slow=False)
+myobj.save("Audio/wearmask.mp3")
+
+mytext = 'Thank you for wearing a mask. You may proceed.'
+language = 'en'
+myobj = gTTS(text=mytext, lang=language, slow=False)
+myobj.save("Audio/proceed.mp3")
+
 def wearmask():
-    mytext = 'You are not wearing a mask. Please take one from the opening box.'
-    language = 'en'
-    myobj = gTTS(text=mytext, lang=language, slow=False)
-    myobj.save("wearmask.mp3")
-    playsound('wearmask.mp3')
+	playsound('Audio/wearmask.mp3')
 
 def proceed():
-    mytext = 'Thank you for wearing a mask. You may proceed.'
-    language = 'en'
-    myobj = gTTS(text=mytext, lang=language, slow=False)
-    myobj.save("proceed.mp3")
-    playsound('proceed.mp3')
+	playsound('Audio/proceed.mp3')
 
 def classification():
 	# Disable scientific notation for clarity
 	np.set_printoptions(suppress=True)
 
 	# Load the model
-	model = tensorflow.keras.models.load_model('keras_model.h5')
+	model = tensorflow.keras.models.load_model('Model/keras_model.h5')
 
 	# Create the array of the right shape to feed into the keras model
 	# The 'length' or number of images you can put into the array is
@@ -62,17 +77,22 @@ def classification():
 	# run the inference
 	prediction = model.predict(data)
 	if prediction[0][0]==max(prediction[0]):
-    	print("Mask")
-	elif prediction[0][1]==max(prediction[0]):
-    	print("No mask")
-		print(prediction[0][0])
+		print("Mask")
 		print(prediction)
-		wearmask()
+		#print(prediction[0][0])
 		proceed()
+	elif prediction[0][1]==max(prediction[0]):
+		print("No mask")
+		print(prediction)
+		#print(prediction[0][0])
+		
+		wearmask()
+		#send_angle()
+
 
 # load our serialized model from disk
 print("[INFO] loading model...")
-net = cv2.dnn.readNetFromCaffe('deploy.prototxt.txt', 'res10_300x300_ssd_iter_140000.caffemodel')
+net = cv2.dnn.readNetFromCaffe('Model/deploy.prototxt.txt', 'Model/res10_300x300_ssd_iter_140000.caffemodel')
 
 # initialize the video stream and allow the cammera sensor to warmup
 print("[INFO] starting video stream...")
